@@ -39,11 +39,7 @@ class BooksSpider(scrapy.Spider):
             product_main.css("p.star-rating::attr(class)").get()
         )
         category = response.css(".breadcrumb li a::text").getall()[-1]
-        description = response.css(
-            "article.product_page p::text"
-        ).getall()[-1]
-        print(description)
-        print()
+        description = response.css("#product_description + p::text").get()
 
     @staticmethod
     def get_b_n_from_stock_l(stock_list: List) -> int:
