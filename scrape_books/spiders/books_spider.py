@@ -21,7 +21,7 @@ class BooksSpider(scrapy.Spider):
             book_full_url = urljoin(response.url, book_ulr)
             yield scrapy.Request(url=book_full_url, callback=self.parse_book)
         next_page = response.css(".next a::attr(href)").get()
-        if next is not None:
+        if next_page is not None:
             yield response.follow(next_page, self.parse)
 
     def parse_book(self, response, *args, **kwargs):
