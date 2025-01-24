@@ -16,11 +16,13 @@ class BooksSpider(scrapy.Spider):
 
     def parse(self, response, *args, **kwargs):
         books = response.css(".product_pod")
-        next_page_url = response.css(".next").css("a::attr(href)").get()
         for book in books:
             book_ulr = book.css("h3").css("a::attr(href)").get()
             book_full_url = urljoin(response.url, book_ulr)
             yield scrapy.Request(url=book_full_url, callback=self.parse_book)
+        next_page = response.css(".next a::attr(href)").get()
+        if next is not None:
+            yield response.follow(next_page, self.parse)
 
     def parse_book(self, response, *args, **kwargs):
         product_main = response.css(".product_main")
@@ -34,12 +36,21 @@ class BooksSpider(scrapy.Spider):
         amount_in_stock = self.get_b_n_from_stock_l(
             amount_in_stock_text_list
         )
-
         rating = self.get_rating_from_class_name(
             product_main.css("p.star-rating::attr(class)").get()
         )
         category = response.css(".breadcrumb li a::text").getall()[-1]
         description = response.css("#product_description + p::text").get()
+        upc = response.css(".table-striped td::text").getall()[0]
+        yield {
+            "title": title,
+            "price": price,
+            "amount_in_stock": amount_in_stock,
+            "rating": rating,
+            "category": category,
+            "description": description,
+            "upc": upc
+        }
 
     @staticmethod
     def get_b_n_from_stock_l(stock_list: List) -> int:
