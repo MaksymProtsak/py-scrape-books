@@ -34,8 +34,16 @@ class BooksSpider(scrapy.Spider):
         amount_in_stock = self.get_b_n_from_stock_l(
             amount_in_stock_text_list
         )
-        rating = ""
-        breakpoint()
+
+        rating = self.get_rating_from_class_name(
+            product_main.css("p.star-rating::attr(class)").get()
+        )
+        category = response.css(".breadcrumb li a::text").getall()[-1]
+        description = response.css(
+            "article.product_page p::text"
+        ).getall()[-1]
+        print(description)
+        print()
 
     @staticmethod
     def get_b_n_from_stock_l(stock_list: List) -> int:
@@ -52,3 +60,14 @@ class BooksSpider(scrapy.Spider):
             ]
         )
         return int(stock_str)
+
+    @staticmethod
+    def get_rating_from_class_name(class_in_rating: str) -> int:
+        rating_to_int = {
+            "One": 1,
+            "Two": 2,
+            "Three": 3,
+            "Four": 4,
+            "Five": 5,
+        }
+        return rating_to_int[class_in_rating.split()[-1]]
